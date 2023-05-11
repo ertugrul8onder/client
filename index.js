@@ -3,7 +3,7 @@ var ParametersAjaxTable = function () {
 
     const getUsers = function () {
         return $.ajax({
-            url: 'https://server-rszl.onrender.com/data',
+            url: 'https://server-rszl.onrender.com//data',
             type: 'GET',
             dataType: "json",
             contentType: "application/json",
@@ -29,39 +29,39 @@ var ParametersAjaxTable = function () {
             responsive: true,
             data: data,
             columns: [
-                { title: 'Name', data: 'name', width: '20%' },
-                { title: 'Lastname', data: 'lastName', width: '20%' },
-                { title: 'Age', data: 'age', width: '10%' },
-                { title: 'Hobbies', data: 'hobbies', width: '30%' },
-                { title: 'Actions', data: null, width: '20%' },
+                { title: 'First Name', data: 'first_name', width: '20%' },
+                { title: 'Last Name', data: 'last_name', width: '20%' },
+                { title: 'Email', data: 'email', width: '10%' },
+                // { title: 'Hobbies', data: 'hobbies', width: '30%' },
+                // { title: 'Actions', data: null, width: '20%' },
             ],
             columnDefs: [
-                {
-                    targets: 3,
-                    orderable: false,
-                    render: function (data, type, full, meta) {
-                        let html = ``
-                        let colorIndex = Math.floor(Math.random() * colors.length)
+                // {
+                //     targets: 3,
+                //     orderable: false,
+                //     render: function (data, type, full, meta) {
+                //         let html = ``
+                //         let colorIndex = Math.floor(Math.random() * colors.length)
 
-                        data.forEach(function (item, i) {
-                            html += `<span class="label label-lg label-${colors[colorIndex]} label-inline m-1">${item}</span>`
-                        })
+                //         data.forEach(function (item, i) {
+                //             html += `<span class="label label-lg label-${colors[colorIndex]} label-inline m-1">${item}</span>`
+                //         })
 
-                        return html
-                    },
-                },
-                {
-                    targets: 4,
-                    orderable: false,
-                    render: function (data, type, full, meta) {
-                        return `<a class="editButton btn btn-sm btn-light-primary m-1" title="Edit">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a class="deleteButton btn btn-sm btn-light-danger m-1" title="Delete">
-                                    <i class="fas fa-trash"></i> Delete
-                                </a>`
-                    },
-                },
+                //         return html
+                //     },
+                // },
+                // {
+                //     targets: 4,
+                //     orderable: false,
+                //     render: function (data, type, full, meta) {
+                //         return `<a class="editButton btn btn-sm btn-light-primary m-1" title="Edit">
+                //                     <i class="fas fa-edit"></i> Edit
+                //                 </a>
+                //                 <a class="deleteButton btn btn-sm btn-light-danger m-1" title="Delete">
+                //                     <i class="fas fa-trash"></i> Delete
+                //                 </a>`
+                //     },
+                // },
             ],
             initComplete: function () {
                 $('#addNewButton').on('click', function () {
