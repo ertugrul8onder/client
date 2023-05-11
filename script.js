@@ -3,7 +3,7 @@ var ParametersAjaxTable = function () {
 
     const getUsers = function () {
         return $.ajax({
-            url: 'https://crud-app-541e8.web.app/data',
+            url: 'https://server-rszl.onrender.com/data',
             type: 'GET',
             dataType: "json",
             contentType: "application/json",
