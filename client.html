@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<title>Ajax Client Side Examples | Keenthemes</title>
+	<meta name="description" content="Ajax sourced data examples" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+	<link rel="canonical" href="https://keenthemes.com/metronic" />
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
+	<link href="assets/plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
+	<link href="assets/plugins/custom/prismjs/prismjs.bundle.css" rel="stylesheet" type="text/css" />
+	<link href="assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+	<link rel="shortcut icon" href="assets/media/logos/favicon.ico" />
+</head>
+
+<body id="body">
+
+	<div class="container p-10">
+		<div class="card card-custom">
+			<div class="card-header">
+				<div class="card-title">
+					<span class="card-icon">
+						<i class="flaticon2-psd text-primary"></i>
+					</span>
+					<h3 class="card-label">Ajax Sourced Client Side Processing</h3>
+				</div>
+				<div class="card-toolbar">
+					<div class="dropdown dropdown-inline mr-2 show">
+						<div class="dropdown dropdown-inline mr-2">
+							<button type="button" class="btn btn-light-primary font-weight-bolder dropdown-toggle"
+								data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								<span class="svg-icon svg-icon-md">
+									<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+										width="24px" height="24px" viewBox="0 0 24 24" version="1.1">
+										<g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+											<rect x="0" y="0" width="24" height="24"></rect>
+											<path
+												d="M3,16 L5,16 C5.55228475,16 6,15.5522847 6,15 C6,14.4477153 5.55228475,14 5,14 L3,14 L3,12 L5,12 C5.55228475,12 6,11.5522847 6,11 C6,10.4477153 5.55228475,10 5,10 L3,10 L3,8 L5,8 C5.55228475,8 6,7.55228475 6,7 C6,6.44771525 5.55228475,6 5,6 L3,6 L3,4 C3,3.44771525 3.44771525,3 4,3 L10,3 C10.5522847,3 11,3.44771525 11,4 L11,19 C11,19.5522847 10.5522847,20 10,20 L4,20 C3.44771525,20 3,19.5522847 3,19 L3,16 Z"
+												fill="#000000" opacity="0.3"></path>
+											<path
+												d="M16,3 L19,3 C20.1045695,3 21,3.8954305 21,5 L21,15.2485298 C21,15.7329761 20.8241635,16.200956 20.5051534,16.565539 L17.8762883,19.5699562 C17.6944473,19.7777745 17.378566,19.7988332 17.1707477,19.6169922 C17.1540423,19.602375 17.1383289,19.5866616 17.1237117,19.5699562 L14.4948466,16.565539 C14.1758365,16.200956 14,15.7329761 14,15.2485298 L14,5 C14,3.8954305 14.8954305,3 16,3 Z"
+												fill="#000000"></path>
+										</g>
+									</svg>
+								</span>Export</button>
+							<div class="dropdown-menu dropdown-menu-sm dropdown-menu-right">
+								<ul class="navi flex-column navi-hover py-2">
+									<li
+										class="navi-header font-weight-bolder text-uppercase font-size-sm text-primary pb-2">
+										Choose an option:</li>
+									<li class="navi-item">
+										<a href="#" class="navi-link" id="export_print">
+											<span class="navi-icon">
+												<i class="la la-print"></i>
+											</span>
+											<span class="navi-text">Print</span>
+										</a>
+									</li>
+									<li class="navi-item">
+										<a href="#" class="navi-link" id="export_copy">
+											<span class="navi-icon">
+												<i class="la la-copy"></i>
+											</span>
+											<span class="navi-text">Copy</span>
+										</a>
+									</li>
+									<li class="navi-item">
+										<a href="#" class="navi-link" id="export_excel">
+											<span class="navi-icon">
+												<i class="la la-file-excel-o"></i>
+											</span>
+											<span class="navi-text">Excel</span>
+										</a>
+									</li>
+									<li class="navi-item">
+										<a href="#" class="navi-link" id="export_csv">
+											<span class="navi-icon">
+												<i class="la la-file-text-o"></i>
+											</span>
+											<span class="navi-text">CSV</span>
+										</a>
+									</li>
+									<li class="navi-item">
+										<a href="#" class="navi-link" id="export_pdf">
+											<span class="navi-icon">
+												<i class="la la-file-pdf-o"></i>
+											</span>
+											<span class="navi-text">PDF</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+					</div>
+					<a id="addNewButton" class="btn btn-primary font-weight-bolder" data-toggle="modal"
+						data-target="#addNewModal">
+						<i class="la la-plus"></i>Add New
+					</a>
+
+					<div class="modal fade" id="addNewModal" tabindex="-1" role="dialog"
+						aria-labelledby="addNewModalLAbel" aria-hidden="true">
+						<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="addNewModalLAbel">Modal Title</h5>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										<i aria-hidden="true" class="ki ki-close"></i>
+									</button>
+								</div>
+								<div class="modal-body">
+									<div class="card card-custom">
+										<div class="card-header">
+											<h3 class="card-title">
+												Add New Form
+											</h3>
+											<div class="card-toolbar">
+												<div class="example-tools justify-content-center">
+													<span class="example-toggle" data-toggle="tooltip"
+														title="View code"></span>
+													<span class="example-copy" data-toggle="tooltip"
+														title="Copy code"></span>
+												</div>
+											</div>
+										</div>
+										<form id="addNewForm">
+											<div class="card-body">
+												<div class="form-group">
+													<label>First Name</label>
+													<input name="firstName" type="text" class="form-control"
+														placeholder="Enter name" />
+												</div>
+												<div class="form-group">
+													<label>Last Name</label>
+													<input name="lastName" type="text" class="form-control"
+														placeholder="Enter last name" />
+												</div>
+												<div class="form-group">
+													<label>Phone</label>
+													<input name="phone" type="text" class="form-control"
+														placeholder="Enter phone" />
+												</div>
+												<div class="form-group">
+													<label>Email</label>
+													<input name="email" type="email" class="form-control"
+														placeholder="Enter email" />
+												</div>
+												<div id="hobbiesRepeater">
+													<div class="form-group row">
+														<label
+															class="col-lg-2 col-form-label text-right">Hobbies</label>
+														<div data-repeater-list="" class="col-lg-10">
+															<div data-repeater-item=""
+																class="form-group align-items-end">
+																<div class="col-md-8">
+																	<label class="hobbiesLabel"></label>
+																	<input name="hobbie" type="email"
+																		class="form-control"
+																		placeholder="Enter hobbie" />
+																	<div class="d-md-none mb-2"></div>
+																</div>
+																<div class="col-md-4">
+																	<a href="javascript:;" data-repeater-delete=""
+																		class="btn btn-sm font-weight-bolder btn-light-danger">
+																		<i class="la la-trash-o"></i>Delete</a>
+																</div>
+															</div>
+														</div>
+													</div>
+													<div class="form-group row">
+														<label class="col-lg-2 col-form-label text-right"></label>
+														<div class="col-lg-4">
+															<a href="javascript:;" data-repeater-create=""
+																class="btn btn-sm font-weight-bolder btn-light-primary">
+																<i class="la la-plus"></i>Add</a>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="card-footer">
+												<button type="button" class="btn btn-light-danger font-weight-bold"
+													data-dismiss="modal">Cancel</button>
+												<button type="submit"
+													class="btn btn-primary font-weight-bold">Submit</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card-body">
+				<table class="table table-bordered table-hover table-checkable" id="crudTable"
+					style="margin-top: 13px !important">
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<script>var HOST_URL = "https://preview.keenthemes.com/metronic/theme/html/tools/preview";</script>
+	<script>var KTAppSettings = { "breakpoints": { "sm": 576, "md": 768, "lg": 992, "xl": 1200, "xxl": 1400 }, "colors": { "theme": { "base": { "white": "#ffffff", "primary": "#3699FF", "secondary": "#E5EAEE", "success": "#1BC5BD", "info": "#8950FC", "warning": "#FFA800", "danger": "#F64E60", "light": "#E4E6EF", "dark": "#181C32" }, "light": { "white": "#ffffff", "primary": "#E1F0FF", "secondary": "#EBEDF3", "success": "#C9F7F5", "info": "#EEE5FF", "warning": "#FFF4DE", "danger": "#FFE2E5", "light": "#F3F6F9", "dark": "#D6D6E0" }, "inverse": { "white": "#ffffff", "primary": "#ffffff", "secondary": "#3F4254", "success": "#ffffff", "info": "#ffffff", "warning": "#ffffff", "danger": "#ffffff", "light": "#464E5F", "dark": "#ffffff" } }, "gray": { "gray-100": "#F3F6F9", "gray-200": "#EBEDF3", "gray-300": "#E4E6EF", "gray-400": "#D1D3E0", "gray-500": "#B5B5C3", "gray-600": "#7E8299", "gray-700": "#5E6278", "gray-800": "#3F4254", "gray-900": "#181C32" } }, "font-family": "Poppins" };</script>
+	<script src="assets/plugins/global/plugins.bundle.js"></script>
+	<script src="assets/plugins/custom/prismjs/prismjs.bundle.js"></script>
+	<script src="assets/js/scripts.bundle.js"></script>
+	<script src="assets/plugins/custom/datatables/datatables.bundle.js"></script>
+	<script src="client.js"></script>
+</body>
+
+</html>
