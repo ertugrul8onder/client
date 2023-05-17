@@ -332,7 +332,7 @@ const UsersTable = function () {
 
     const getUsers = function () {
         return $.ajax({
-            url: 'https://server-rszl.onrender.com/data',
+            url: 'http://localhost:3000/data',
             type: 'GET',
             dataType: "json",
             contentType: "application/json",
@@ -369,7 +369,6 @@ const UsersTable = function () {
             columns: [
                 { title: 'First Name', data: 'first_name' },
                 { title: 'Last Name', data: 'last_name' },
-                { title: 'Phone', data: 'phone' },
                 { title: 'Email', data: 'email' },
                 { title: 'Hobbies', data: 'hobbies' },
                 { title: 'Actions', data: null },
@@ -393,33 +392,64 @@ const UsersTable = function () {
                     orderable: false,
                     render: function (data, type, full, meta) {
                         let html =
-                            `<a href="javascript:;" class="btn btn-sm btn-success btn-icon m-1" title="Print details">                                
+                            `<a href="javascript:;" class="btn btn-sm font-weight-bolder btn-light-success btn-icon m-1" title="Print details">                                
                                 <i class="la la-print"></i>
                             </a>
-                            <a href="javascript:;" class="btn btn-sm btn-primary btn-icon m-1" title="Edit details">
+                            <a href="javascript:;" class="btn btn-sm font-weight-bolder btn-light-primary btn-icon m-1" title="Edit details">
                                 <i class="la la-edit"></i>
                             </a>
-                            <a href="javascript:;" class="btn btn-sm btn-danger btn-icon m-1" title="Delete">
+                            <a href="javascript:;" class="btn btn-sm font-weight-bolder btn-light-danger btn-icon m-1" title="Delete">
                                 <i class="la la-trash"></i>
                             </a>`
                         return html
                     },
                 },
             ],
-            initComplete: function () {
-                // $('#addNewButton').on('click', function () {
-                //     fv.updateValidatorOption('name', 'different', 'compare', function () {
-                //         return ``
-                //     }).updateValidatorOption('lastname', 'different', 'compare', function () {
-                //         return ``
-                //     }).updateValidatorOption('age', 'different', 'compare', function () {
-                //         return ``
-                //     }).updateValidatorOption('hobbies', 'different', 'compare', function () {
-                //         return ``
-                //     })
-                // })
-            }
         });
+
+        $('#submitButton').on('click', function () {
+            const getHobbies = function () {
+                let hobbies = []
+                $('#hobbiesRepeater').find('input').each(function (i, item) {
+                    if ($(item).attr('name').includes('hobbie') && $(item).val() !== '') {
+                        hobbies.push($(item).val())
+                    }
+                })
+                return hobbies
+            }
+            fv.validate().then(function (status) {
+                if (status === 'Valid') {
+                    console.log($('#hobbiesRepeater').find('input'))
+                    let formData = {
+                        first_name: $('#firstName').val(),
+                        last_name: $('#lastName').val(),
+                        email: $('#email').val(),
+                        hobbies: getHobbies()
+                    }
+
+                    postUser(formData)
+
+                    $.ajax({
+                        url: 'http://localhost:3000/data',
+                        type: 'GET',
+                        dataType: "json",
+                        contentType: "application/json",
+                        success: function (data) {
+                            // console.log(data)
+                        },
+                        error: function (error) {
+                            console.log(error)
+                        }
+                    }).done(function (json) {
+                        $('#root').UpdateNotes({ data: json })
+                    }).fail(function (jqxhr, textStatus, error) {
+                        Swal.fire("Error", "Data could not be retrieved.", "error")
+                        console.log(error)
+                    })
+                }
+            })
+        })
+
         $('#export_print').on('click', function (e) {
             e.preventDefault();
             table.button(0).trigger();
@@ -447,21 +477,6 @@ const UsersTable = function () {
     };
 
     const formValidation = function () {
-        const extraValidators = {
-            hobbie: {
-                validators: {
-                    notEmpty: {
-                        message: 'Hobbie is required'
-                    },
-                    stringLength: {
-                        min: 3,
-                        max: 100,
-                        message: 'Please enter a menu within text length range 3 and 100'
-                    }
-                }
-            },
-        }
-
         fv = FormValidation.formValidation(
             document.getElementById('addNewForm'),
             {
@@ -469,14 +484,14 @@ const UsersTable = function () {
                     firstName: {
                         validators: {
                             notEmpty: {
-                                message: 'Name is required'
+                                message: 'First name is required'
                             },
-                            different: {
-                                compare: function () {
-                                    return ''
-                                },
-                                message: 'Name cannot be the same'
-                            }
+                            // different: {
+                            //     compare: function () {
+                            //         return ''
+                            //     },
+                            //     message: 'First name cannot be the same'
+                            // }
                         }
                     },
                     lastName: {
@@ -484,25 +499,12 @@ const UsersTable = function () {
                             notEmpty: {
                                 message: 'Last name is required'
                             },
-                            different: {
-                                compare: function () {
-                                    return ''
-                                },
-                                message: 'Lastname cannot be the same'
-                            }
-                        }
-                    },
-                    phone: {
-                        validators: {
-                            notEmpty: {
-                                message: 'Phone is required'
-                            },
-                            different: {
-                                compare: function () {
-                                    return ''
-                                },
-                                message: 'Age cannot be the same'
-                            }
+                            // different: {
+                            //     compare: function () {
+                            //         return ''
+                            //     },
+                            //     message: 'Last name cannot be the same'
+                            // }
                         }
                     },
                     email: {
@@ -510,12 +512,12 @@ const UsersTable = function () {
                             notEmpty: {
                                 message: 'Email is required'
                             },
-                            different: {
-                                compare: function () {
-                                    return ''
-                                },
-                                message: 'Email cannot be the same'
-                            }
+                            // different: {
+                            //     compare: function () {
+                            //         return ''
+                            //     },
+                            //     message: 'Email cannot be the same'
+                            // }
                         }
                     },
                 },
@@ -525,41 +527,21 @@ const UsersTable = function () {
                     submitButton: new FormValidation.plugins.SubmitButton(),
                 },
             })
-
-        extraFormValidation(extraValidators)
     }
 
-    const extraFormValidation = function (extraValidators) {
-        $('#hobbiesRepeater').repeater({
-            initEmpty: true,
-            show: function () {
-                let repeaterItems = $('#hobbiesRepeater [data-repeater-item]')
-                repeaterItems.each(function (i, item) {
-                    console.log($(item))
-                    $(item).attr('order', i)
-                    $(item).find('.hobbiesLabel').html(`Hobbie ${i + 1}`)
-                    fv.addField(`[${i}][hobbie]`, extraValidators.hobbie)
-                })
-                $(this).slideDown()
-            },
-            hide: function (deleteElement) {
-                let order = $(this).attr('order')
-                let repeaterItems = $('#hobbiesRepeater [data-repeater-item]')
-                fv.removeField(`[${order}][hobbie]`)
-                repeaterItems.each(function (i, item) {
-                    if ($(item).attr('order') === order) {
-                        repeaterItems.splice(i, 1)
-                    }
-                })
-                $(this).slideUp(deleteElement)
-            },
-        })
-    }
+    $('#hobbiesRepeater').repeater({
+        show: function () {
+            $(this).slideDown()
+        },
+        hide: function (deleteElement) {
+            $(this).slideUp(deleteElement)
+        },
+    })
 
     return {
         init: async function () {
             const data = await getUsers()
-            initTable(data);
+            initTable(data)
             formValidation()
         },
     };
