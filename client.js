@@ -332,7 +332,7 @@ const UsersTable = function () {
 
     const getUsers = function () {
         return $.ajax({
-            url: 'http://localhost:3000/data',
+            url: 'https://server-rszl.onrender.com/data',
             type: 'GET',
             dataType: "json",
             contentType: "application/json",
@@ -426,26 +426,26 @@ const UsersTable = function () {
                         email: $('#email').val(),
                         hobbies: getHobbies()
                     }
+                    console.log(formData)
+                    // postUser(formData)
 
-                    postUser(formData)
-
-                    $.ajax({
-                        url: 'http://localhost:3000/data',
-                        type: 'GET',
-                        dataType: "json",
-                        contentType: "application/json",
-                        success: function (data) {
-                            // console.log(data)
-                        },
-                        error: function (error) {
-                            console.log(error)
-                        }
-                    }).done(function (json) {
-                        $('#root').UpdateNotes({ data: json })
-                    }).fail(function (jqxhr, textStatus, error) {
-                        Swal.fire("Error", "Data could not be retrieved.", "error")
-                        console.log(error)
-                    })
+                    // $.ajax({
+                    //     url: 'http://localhost:3000/data',
+                    //     type: 'GET',
+                    //     dataType: "json",
+                    //     contentType: "application/json",
+                    //     success: function (data) {
+                    //         // console.log(data)
+                    //     },
+                    //     error: function (error) {
+                    //         console.log(error)
+                    //     }
+                    // }).done(function (json) {
+                    //     $('#root').UpdateNotes({ data: json })
+                    // }).fail(function (jqxhr, textStatus, error) {
+                    //     Swal.fire("Error", "Data could not be retrieved.", "error")
+                    //     console.log(error)
+                    // })
                 }
             })
         })
