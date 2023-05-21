@@ -332,13 +332,26 @@ const UsersTable = function () {
 
     const getUsers = function () {
         return $.ajax({
-            url: 'https://server-rszl.onrender.com/data',
+            url: 'http://localhost:3000/data',
             type: 'GET',
             dataType: "json",
             contentType: "application/json",
-            // headers: {
-            //     'X-Jsio-Token': '5c7ad8c2000920981b1b0269fc1c9b48'
-            // },
+            success: function (data) {
+                console.log(data)
+            },
+            error: function (error) {
+                console.log(error)
+            }
+        })
+    }
+
+    const postUser = function (formData) {
+        return $.ajax({
+            url: 'http://localhost:3000/data',
+            type: 'POST',
+            data: JSON.stringify(formData),
+            dataType: "json",
+            contentType: "application/json",
             success: function (data) {
                 console.log(data)
             },
@@ -417,7 +430,7 @@ const UsersTable = function () {
                 })
                 return hobbies
             }
-            fv.validate().then(function (status) {
+            fv.validate().then(async function (status) {
                 if (status === 'Valid') {
                     console.log($('#hobbiesRepeater').find('input'))
                     let formData = {
@@ -426,26 +439,8 @@ const UsersTable = function () {
                         email: $('#email').val(),
                         hobbies: getHobbies()
                     }
-                    console.log(formData)
-                    // postUser(formData)
 
-                    // $.ajax({
-                    //     url: 'http://localhost:3000/data',
-                    //     type: 'GET',
-                    //     dataType: "json",
-                    //     contentType: "application/json",
-                    //     success: function (data) {
-                    //         // console.log(data)
-                    //     },
-                    //     error: function (error) {
-                    //         console.log(error)
-                    //     }
-                    // }).done(function (json) {
-                    //     $('#root').UpdateNotes({ data: json })
-                    // }).fail(function (jqxhr, textStatus, error) {
-                    //     Swal.fire("Error", "Data could not be retrieved.", "error")
-                    //     console.log(error)
-                    // })
+                    await postUser(formData)
                 }
             })
         })
@@ -540,8 +535,7 @@ const UsersTable = function () {
 
     return {
         init: async function () {
-            const data = await getUsers()
-            initTable(data)
+            initTable(Object.values(await getUsers()))
             formValidation()
         },
     };
