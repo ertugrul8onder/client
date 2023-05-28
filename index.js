@@ -328,6 +328,7 @@
 // }()
 
 const UsersTable = function () {
+    const table = $('#crudTable')
     let fv = FormValidation
 
     const getUsers = function () {
@@ -354,6 +355,7 @@ const UsersTable = function () {
             contentType: "application/json",
             success: function (data) {
                 console.log(data)
+                console.log(table)
             },
             error: function (error) {
                 console.log(error)
@@ -369,7 +371,7 @@ const UsersTable = function () {
         }
 
         // begin first table
-        const table = $('#crudTable').DataTable({
+        table.DataTable({
             responsive: true,
             data: data,
             buttons: [
@@ -380,11 +382,32 @@ const UsersTable = function () {
                 'pdfHtml5',
             ],
             columns: [
-                { title: 'First Name', data: 'first_name' },
-                { title: 'Last Name', data: 'last_name' },
-                { title: 'Email', data: 'email' },
-                { title: 'Hobbies', data: 'hobbies' },
-                { title: 'Actions', data: null },
+                {
+                    title: 'First Name',
+                    data: 'first_name'
+                },
+                {
+                    title: 'Last Name',
+                    data: 'last_name'
+                },
+                {
+                    title: 'Email',
+                    data: 'email'
+                },
+                {
+                    title: 'Hobbies',
+                    data: function (data) {
+                        if (data.hobbies) {
+                            return data.hobbies
+                        } else {
+                            return ''
+                        }
+                    }
+                },
+                {
+                    title: 'Actions',
+                    data: null
+                },
             ],
             columnDefs: [
                 {
@@ -393,9 +416,11 @@ const UsersTable = function () {
                     render: function (data, type, full, meta) {
                         let html = ``
 
-                        data.forEach(function (item, i) {
-                            html += `<span class="label label-lg label-${getColors()} label-inline m-1">${item}</span>`
-                        })
+                        if (data) {
+                            data.forEach(function (item, i) {
+                                html += `<span class="label label-lg label-${getColors()} label-inline m-1">${item}</span>`
+                            })
+                        }
 
                         return html
                     },
@@ -423,21 +448,24 @@ const UsersTable = function () {
         $('#submitButton').on('click', function () {
             const getHobbies = function () {
                 let hobbies = []
+
                 $('#hobbiesRepeater').find('input').each(function (i, item) {
-                    if ($(item).attr('name').includes('hobbie') && $(item).val() !== '') {
+                    if ($(item).val() !== '') {
                         hobbies.push($(item).val())
                     }
                 })
+
                 return hobbies
             }
             fv.validate().then(async function (status) {
                 if (status === 'Valid') {
-                    console.log($('#hobbiesRepeater').find('input'))
+                    let hobbies = getHobbies()
+
                     let formData = {
                         first_name: $('#firstName').val(),
                         last_name: $('#lastName').val(),
                         email: $('#email').val(),
-                        hobbies: getHobbies()
+                        hobbies: hobbies
                     }
 
                     await postUser(formData)
@@ -507,6 +535,9 @@ const UsersTable = function () {
                             notEmpty: {
                                 message: 'Email is required'
                             },
+                            emailAddress: {
+                                message: 'The value is not a valid email address'
+                            }
                             // different: {
                             //     compare: function () {
                             //         return ''
@@ -535,11 +566,11 @@ const UsersTable = function () {
 
     return {
         init: async function () {
-            initTable(Object.values(await getUsers()))
+            const data = Object.values(await getUsers())
+            initTable(data)
             formValidation()
         },
     };
-
 }();
 
 $(document).ready(function () {
