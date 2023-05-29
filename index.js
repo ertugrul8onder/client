@@ -351,7 +351,7 @@ const UsersTable = function () {
             url: 'http://localhost:3000/data',
             type: 'POST',
             data: JSON.stringify(formData),
-            dataType: "json",
+            dataType: "text",
             contentType: "application/json",
             success: function (data) {
                 console.log(data)
