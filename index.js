@@ -412,7 +412,7 @@ const UsersTable = function () {
                             <a href="javascript:;" class="btn btn-sm font-weight-bolder btn-light-primary btn-icon m-1" title="Edit details">
                                 <i class="la la-edit"></i>
                             </a>
-                            <a href="javascript:;" class="btn btn-sm font-weight-bolder btn-light-danger btn-icon m-1" title="Delete">
+                            <a href="javascript:;" class="deleteButton btn btn-sm font-weight-bolder btn-light-danger btn-icon m-1" title="Delete">
                                 <i class="la la-trash"></i>
                             </a>`
                         return html
@@ -526,7 +526,6 @@ const UsersTable = function () {
                     let hobbies = getHobbies()
 
                     let formData = {
-                        id: 1,
                         first_name: $('#firstName').val(),
                         last_name: $('#lastName').val(),
                         email: $('#email').val(),
@@ -540,6 +539,27 @@ const UsersTable = function () {
                         Store.Validation.resetForm(true)
                         Swal.fire('Created successfully!', '', 'success')
                     })
+                }
+            })
+        })
+
+        Store.Table.on('click', 'a.deleteButton', function () {
+            Swal.fire({
+                title: 'Do you want to delete object?',
+                reverseButtons: true,
+                showCancelButton: true,
+                cancelButtonText: 'Cancel',
+                confirmButtonText: 'Delete',
+                customClass: {
+                    confirmButton: 'btn btn-danger',
+                    cancelButton: 'btn btn-secondary'
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let row = Store.Table.row($(this).parents('tr'))
+                    let rowData = row.data()
+
+                    deleteUser(row, rowData)
                 }
             })
         })
@@ -559,7 +579,7 @@ const UsersTable = function () {
 
     const getUsers = function () {
         return $.ajax({
-            url: 'https://server.ertugrulonder.com/data',
+            url: 'http://localhost:3000/data',
             type: 'GET',
             dataType: "json",
             contentType: "application/json",
@@ -574,7 +594,7 @@ const UsersTable = function () {
 
     const postUser = function (formData) {
         return $.ajax({
-            url: 'https://server.ertugrulonder.com/data',
+            url: 'http://localhost:3000/data',
             type: 'POST',
             data: JSON.stringify(formData),
             dataType: "text",
@@ -588,10 +608,35 @@ const UsersTable = function () {
         })
     }
 
+    const deleteUser = function (row, rowData) {
+        console.log(row)
+        console.log(rowData)
+        // return $.ajax({
+        //     url: 'http://localhost:3000/data',
+        //     type: 'DELETE',
+        //     data: JSON.stringify(formData),
+        //     dataType: "text",
+        //     contentType: "application/json",
+        //     success: function (data) {
+        //         console.log(data)
+        //     },
+        //     error: function (error) {
+        //         console.log(error)
+        //     }
+        // })
+    }
+
     return {
         init: function () {
             getUsers().done(function (data, textStatus, jqXHR) {
-                Store.Table = initTable(Object.values(data))
+                let tableData = Object.values(data)
+                let uids = Object.keys(data)
+
+                tableData.forEach((item, i) => {
+                    item.id = uids[i]
+                });
+
+                Store.Table = initTable(tableData)
                 Store.Validation = initFormValidation()
 
                 initFormRepeater()
