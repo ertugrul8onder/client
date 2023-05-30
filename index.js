@@ -579,7 +579,7 @@ const UsersTable = function () {
 
     const getUsers = function () {
         return $.ajax({
-            url: 'https://client.ertugrulonder.com/data',
+            url: 'https://server.ertugrulonder.com/data',
             type: 'GET',
             dataType: "json",
             contentType: "application/json",
@@ -594,7 +594,7 @@ const UsersTable = function () {
 
     const postUser = function (formData) {
         return $.ajax({
-            url: 'https://client.ertugrulonder.com/data',
+            url: 'https://server.ertugrulonder.com/data',
             type: 'POST',
             data: JSON.stringify(formData),
             dataType: "text",
