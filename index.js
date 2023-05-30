@@ -327,51 +327,22 @@
 //     }
 // }()
 
+const Store = {
+    AddNewModal: $('#addNewModal'),
+    AddNewForm: $('#addNewForm')[0],
+    HobbiesRepeater: $('#hobbiesRepeater'),
+    SubmitButton: $('#submitButton'),
+}
+
 const UsersTable = function () {
-    const table = $('#crudTable')
-    let fv = FormValidation
-
-    const getUsers = function () {
-        return $.ajax({
-            url: 'https://server.ertugrulonder.com/data',
-            type: 'GET',
-            dataType: "json",
-            contentType: "application/json",
-            success: function (data) {
-                console.log(data)
-            },
-            error: function (error) {
-                console.log(error)
-            }
-        })
-    }
-
-    const postUser = function (formData) {
-        return $.ajax({
-            url: 'https://server.ertugrulonder.com/data',
-            type: 'POST',
-            data: JSON.stringify(formData),
-            dataType: "text",
-            contentType: "application/json",
-            success: function (data) {
-                console.log(data)
-                console.log(table)
-            },
-            error: function (error) {
-                console.log(error)
-            }
-        })
+    const getColors = function () {
+        const colors = ['success', 'primary', 'danger', 'warning', 'dark', 'info']
+        const colorIndex = Math.floor(Math.random() * 6)
+        return colors[colorIndex]
     }
 
     const initTable = function (data) {
-        const getColors = function () {
-            const colors = ['success', 'primary', 'danger', 'warning', 'dark', 'info']
-            const colorIndex = Math.floor(Math.random() * 6)
-            return colors[colorIndex]
-        }
-
-        // begin first table
-        table.DataTable({
+        let table = $('#crudTable').DataTable({
             responsive: true,
             data: data,
             buttons: [
@@ -384,15 +355,18 @@ const UsersTable = function () {
             columns: [
                 {
                     title: 'First Name',
-                    data: 'first_name'
+                    data: 'first_name',
+                    width: '20%'
                 },
                 {
                     title: 'Last Name',
-                    data: 'last_name'
+                    data: 'last_name',
+                    width: '20%'
                 },
                 {
                     title: 'Email',
-                    data: 'email'
+                    data: 'email',
+                    width: '20%'
                 },
                 {
                     title: 'Hobbies',
@@ -402,11 +376,13 @@ const UsersTable = function () {
                         } else {
                             return ''
                         }
-                    }
+                    },
+                    width: '20%'
                 },
                 {
                     title: 'Actions',
-                    data: null
+                    data: null,
+                    width: '20%'
                 },
             ],
             columnDefs: [
@@ -445,34 +421,6 @@ const UsersTable = function () {
             ],
         });
 
-        $('#submitButton').on('click', function () {
-            const getHobbies = function () {
-                let hobbies = []
-
-                $('#hobbiesRepeater').find('input').each(function (i, item) {
-                    if ($(item).val() !== '') {
-                        hobbies.push($(item).val())
-                    }
-                })
-
-                return hobbies
-            }
-            fv.validate().then(async function (status) {
-                if (status === 'Valid') {
-                    let hobbies = getHobbies()
-
-                    let formData = {
-                        first_name: $('#firstName').val(),
-                        last_name: $('#lastName').val(),
-                        email: $('#email').val(),
-                        hobbies: hobbies
-                    }
-
-                    await postUser(formData)
-                }
-            })
-        })
-
         $('#export_print').on('click', function (e) {
             e.preventDefault();
             table.button(0).trigger();
@@ -497,11 +445,13 @@ const UsersTable = function () {
             e.preventDefault();
             table.button(4).trigger();
         });
+
+        return table
     };
 
-    const formValidation = function () {
-        fv = FormValidation.formValidation(
-            document.getElementById('addNewForm'),
+    const initFormValidation = function () {
+        let validation = FormValidation.formValidation(
+            Store.AddNewForm,
             {
                 fields: {
                     firstName: {
@@ -553,22 +503,102 @@ const UsersTable = function () {
                     submitButton: new FormValidation.plugins.SubmitButton(),
                 },
             })
+
+        return validation
     }
 
-    $('#hobbiesRepeater').repeater({
-        show: function () {
-            $(this).slideDown()
-        },
-        hide: function (deleteElement) {
-            $(this).slideUp(deleteElement)
-        },
-    })
+    const initClickListeners = function () {
+        Store.SubmitButton.on('click', function () {
+            const getHobbies = function () {
+                let hobbies = []
+
+                Store.HobbiesRepeater.find('input').each(function (i, item) {
+                    if ($(item).val() !== '') {
+                        hobbies.push($(item).val())
+                    }
+                })
+
+                return hobbies
+            }
+
+            Store.Validation.validate().then(async function (status) {
+                if (status === 'Valid') {
+                    let hobbies = getHobbies()
+
+                    let formData = {
+                        id: 1,
+                        first_name: $('#firstName').val(),
+                        last_name: $('#lastName').val(),
+                        email: $('#email').val(),
+                        hobbies: hobbies
+                    }
+
+                    postUser(formData).done(function (data, textStatus, jqXHR) {
+                        Store.Table.row.add(formData).draw(JSON.parse(data))
+                        Store.HobbiesRepeater.find('[data-repeater-item]').slideUp()
+                        Store.AddNewModal.modal('hide')
+                        Store.Validation.resetForm(true)
+                        Swal.fire('Created successfully!', '', 'success')
+                    })
+                }
+            })
+        })
+    }
+
+    const initFormRepeater = function () {
+        Store.HobbiesRepeater.repeater({
+            initEmpty: true,
+            show: function () {
+                $(this).slideDown()
+            },
+            hide: function (deleteElement) {
+                $(this).slideUp(deleteElement)
+            },
+        })
+    }
+
+    const getUsers = function () {
+        return $.ajax({
+            url: 'https://server.ertugrulonder.com/data',
+            type: 'GET',
+            dataType: "json",
+            contentType: "application/json",
+            success: function (data) {
+                console.log(data)
+            },
+            error: function (error) {
+                console.log(error)
+            }
+        })
+    }
+
+    const postUser = function (formData) {
+        return $.ajax({
+            url: 'https://server.ertugrulonder.com/data',
+            type: 'POST',
+            data: JSON.stringify(formData),
+            dataType: "text",
+            contentType: "application/json",
+            success: function (data) {
+                console.log(data)
+            },
+            error: function (error) {
+                console.log(error)
+            }
+        })
+    }
 
     return {
-        init: async function () {
-            const data = Object.values(await getUsers())
-            initTable(data)
-            formValidation()
+        init: function () {
+            getUsers().done(function (data, textStatus, jqXHR) {
+                Store.Table = initTable(Object.values(data))
+                Store.Validation = initFormValidation()
+
+                initFormRepeater()
+                initClickListeners()
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+            })
         },
     };
 }();
