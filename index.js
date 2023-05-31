@@ -557,9 +557,17 @@ const UsersTable = function () {
             }).then((result) => {
                 if (result.isConfirmed) {
                     let row = Store.Table.row($(this).parents('tr'))
-                    let rowData = row.data()
-
-                    deleteUser(row, rowData)
+                    let deleteData = {
+                        id: row.data().id
+                    }
+                    deleteUser(row, deleteData).done(function (data, textStatus, jqXHR) {
+                        console.log(data)
+                        // Store.Table.row.add(formData).draw(JSON.parse(data))
+                        // Store.HobbiesRepeater.find('[data-repeater-item]').slideUp()
+                        // Store.AddNewModal.modal('hide')
+                        // Store.Validation.resetForm(true)
+                        // Swal.fire('Created successfully!', '', 'success')
+                    })
                 }
             })
         })
@@ -579,7 +587,7 @@ const UsersTable = function () {
 
     const getUsers = function () {
         return $.ajax({
-            url: 'https://server.ertugrulonder.com/data',
+            url: 'http://localhost:3000/data',
             type: 'GET',
             dataType: "json",
             contentType: "application/json",
@@ -594,7 +602,7 @@ const UsersTable = function () {
 
     const postUser = function (formData) {
         return $.ajax({
-            url: 'https://server.ertugrulonder.com/data',
+            url: 'http://localhost:3000/data',
             type: 'POST',
             data: JSON.stringify(formData),
             dataType: "text",
@@ -608,32 +616,30 @@ const UsersTable = function () {
         })
     }
 
-    const deleteUser = function (row, rowData) {
-        console.log(row)
-        console.log(rowData)
-        // return $.ajax({
-        //     url: 'http://localhost:3000/data',
-        //     type: 'DELETE',
-        //     data: JSON.stringify(formData),
-        //     dataType: "text",
-        //     contentType: "application/json",
-        //     success: function (data) {
-        //         console.log(data)
-        //     },
-        //     error: function (error) {
-        //         console.log(error)
-        //     }
-        // })
+    const deleteUser = function (row, deleteData) {
+        return $.ajax({
+            url: 'http://localhost:3000/data',
+            type: 'DELETE',
+            data: JSON.stringify(deleteData),
+            dataType: "text",
+            contentType: "application/json",
+            success: function (data) {
+                console.log(data)
+            },
+            error: function (error) {
+                console.log(error)
+            }
+        })
     }
 
     return {
         init: function () {
             getUsers().done(function (data, textStatus, jqXHR) {
                 let tableData = Object.values(data)
-                let uids = Object.keys(data)
+                let tableKeys = Object.keys(data)
 
                 tableData.forEach((item, i) => {
-                    item.id = uids[i]
+                    item.id = tableKeys[i]
                 });
 
                 Store.Table = initTable(tableData)
