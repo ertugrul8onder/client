@@ -228,7 +228,13 @@ const UsersTable = function () {
                 },
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let row = Store.Table.row($(this).parents('tr'))
+                    let row
+
+                    if ($(this).closest('tr').hasClass('child')) {
+                        row = Store.Table.row($(this).closest('tr').prev())
+                    } else {
+                        row = Store.Table.row($(this).closest('tr'))
+                    }
 
                     let deleteData = {
                         id: row.data().id
