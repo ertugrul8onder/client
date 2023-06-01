@@ -590,7 +590,7 @@ const UsersTable = function () {
             dataType: "json",
             contentType: "application/json",
             success: function (data) {
-                console.log(data)
+                // console.log(data)
             },
             error: function (error) {
                 console.log(error)
@@ -606,7 +606,7 @@ const UsersTable = function () {
             dataType: "text",
             contentType: "application/json",
             success: function (data) {
-                console.log(data)
+                // console.log(data)
             },
             error: function (error) {
                 console.log(error)
@@ -624,7 +624,7 @@ const UsersTable = function () {
             dataType: "text",
             contentType: "application/json",
             success: function (data) {
-                console.log(data)
+                // console.log(data)
             },
             error: function (error) {
                 console.log(error)
