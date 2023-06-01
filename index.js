@@ -185,7 +185,6 @@ const UsersTable = function () {
                 let hobbies = []
 
                 Store.HobbiesRepeater.find('input').each(function (i, item) {
-                    console.log($(item))
                     if ($(item).val() !== '') {
                         hobbies.push($(item).val())
                     }
