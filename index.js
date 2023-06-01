@@ -1,8 +1,10 @@
 const Store = {
     AddNewModal: $('#addNewModal'),
+    AddNewButton: $('#addNewButton'),
     AddNewForm: $('#addNewForm')[0],
     HobbiesRepeater: $('#hobbiesRepeater'),
     SubmitButton: $('#submitButton'),
+    FormMethod: ''
 }
 
 const UsersTable = function () {
@@ -81,7 +83,7 @@ const UsersTable = function () {
                             `<a href="javascript:;" class="btn btn-sm font-weight-bolder btn-light-success btn-icon m-1" title="Print details">                                
                                 <i class="la la-print"></i>
                             </a>
-                            <a href="javascript:;" class="btn btn-sm font-weight-bolder btn-light-primary btn-icon m-1" title="Edit details">
+                            <a href="javascript:;" class="editButton btn btn-sm font-weight-bolder btn-light-primary btn-icon m-1" title="Edit details">
                                 <i class="la la-edit"></i>
                             </a>
                             <a href="javascript:;" class="deleteButton btn btn-sm font-weight-bolder btn-light-danger btn-icon m-1" title="Delete">
@@ -216,6 +218,10 @@ const UsersTable = function () {
             })
         })
 
+        Store.AddNewButton.on('click', function () {
+            Store.FormMethod = 'POST'
+        })
+
         Store.Table.on('click', 'a.deleteButton', function () {
             Swal.fire({
                 title: 'Do you want to delete object?',
@@ -229,14 +235,11 @@ const UsersTable = function () {
                 },
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let row
-                    if ($(this).closest('tr').hasClass('child')) {
-                        row = Store.Table.row($(this).closest('tr').prev())
-                    } else {
-                        row = Store.Table.row($(this).closest('tr'))
-                    }
+                    let row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
+                    let rowData = Store.Table.row(row).data()
+
                     let deleteData = {
-                        id: row.data().id
+                        id: rowData.id
                     }
 
                     deleteUser(row, deleteData).done(function (data) {
@@ -246,6 +249,27 @@ const UsersTable = function () {
                 }
             })
         })
+
+        Store.Table.on('click', 'a.editButton', function () {
+            Store.FormMethod = 'UPDATE'
+            Store.AddNewModal.modal('show')
+            let row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
+            let rowData = Store.Table.row(row).data()
+
+            $('#firstName').val(rowData.first_name)
+            $('#lastName').val(rowData.last_name)
+            $('#email').val(rowData.email)
+        })
+
+        Store.AddNewModal.on('show.bs.modal', function () {
+            if (Store.FormMethod === 'POST') {
+                Store.AddNewModal.find('#addNewModalLabel').html('Add New Modal')
+            } else if (Store.FormMethod === 'UPDATE') {
+                Store.AddNewModal.find('#addNewModalLabel').html('Edit Modal')
+            }
+        })
+
+
     }
 
     const initFormRepeater = function () {
