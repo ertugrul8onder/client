@@ -209,9 +209,9 @@ const UsersTable = function () {
                         Store.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
                             $(this).remove()
                         })
-                        // Store.AddNewModal.modal('hide')
+                        Store.AddNewModal.modal('hide')
                         Store.Validation.resetForm(true)
-                        // Swal.fire('Created successfully!', '', 'success')
+                        Swal.fire('Created successfully!', '', 'success')
                     })
                 }
             })
