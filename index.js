@@ -344,6 +344,7 @@ const UsersTable = function () {
     const initTable = function (data) {
         let table = $('#crudTable').DataTable({
             responsive: true,
+            autoWidth : false,
             data: data,
             buttons: [
                 'print',
@@ -618,7 +619,7 @@ const UsersTable = function () {
 
     const deleteUser = function (row, deleteData) {
         return $.ajax({
-            url: 'http://localhost:3000/data',
+            url: 'https://api.ertugrulonder.com/data',
             type: 'DELETE',
             data: JSON.stringify(deleteData),
             dataType: "text",
