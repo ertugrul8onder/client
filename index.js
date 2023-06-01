@@ -532,8 +532,8 @@ const UsersTable = function () {
                         hobbies: hobbies
                     }
 
-                    postUser(formData).done(function (data, textStatus, jqXHR) {
-                        Store.Table.row.add(formData).draw(JSON.parse(data))
+                    postUser(formData).done(function (data) {
+                        Store.Table.row.add(JSON.parse(data)).draw()
                         Store.HobbiesRepeater.find('[data-repeater-item]').slideUp()
                         Store.AddNewModal.modal('hide')
                         Store.Validation.resetForm(true)
@@ -557,16 +557,14 @@ const UsersTable = function () {
             }).then((result) => {
                 if (result.isConfirmed) {
                     let row = Store.Table.row($(this).parents('tr'))
+
                     let deleteData = {
                         id: row.data().id
                     }
-                    deleteUser(row, deleteData).done(function (data, textStatus, jqXHR) {
-                        console.log(data)
-                        // Store.Table.row.add(formData).draw(JSON.parse(data))
-                        // Store.HobbiesRepeater.find('[data-repeater-item]').slideUp()
-                        // Store.AddNewModal.modal('hide')
-                        // Store.Validation.resetForm(true)
-                        // Swal.fire('Created successfully!', '', 'success')
+
+                    deleteUser(row, deleteData).done(function (data) {
+                        Store.Table.row(row).remove().draw()
+                        Swal.fire('Deleted successfully!', '', 'success')
                     })
                 }
             })
@@ -612,6 +610,8 @@ const UsersTable = function () {
             },
             error: function (error) {
                 console.log(error)
+                Swal.fire('Bir hata oluştu', 'error')
+                Store.AddNewModal.modal('hide')
             }
         })
     }
@@ -648,7 +648,7 @@ const UsersTable = function () {
                 initFormRepeater()
                 initClickListeners()
             }).fail(function (jqXHR, textStatus, errorThrown) {
-
+                console.log(jqXHR)
             })
         },
     };
