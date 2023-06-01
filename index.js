@@ -185,6 +185,7 @@ const UsersTable = function () {
                 let hobbies = []
 
                 Store.HobbiesRepeater.find('input').each(function (i, item) {
+                    console.log($(item))
                     if ($(item).val() !== '') {
                         hobbies.push($(item).val())
                     }
@@ -196,7 +197,6 @@ const UsersTable = function () {
             Store.Validation.validate().then(async function (status) {
                 if (status === 'Valid') {
                     let hobbies = getHobbies()
-
                     let formData = {
                         first_name: $('#firstName').val(),
                         last_name: $('#lastName').val(),
@@ -206,10 +206,12 @@ const UsersTable = function () {
 
                     postUser(formData).done(function (data) {
                         Store.Table.row.add(JSON.parse(data)).draw()
-                        Store.HobbiesRepeater.find('[data-repeater-item]').slideUp()
-                        Store.AddNewModal.modal('hide')
+                        Store.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
+                            $(this).remove()
+                        })
+                        // Store.AddNewModal.modal('hide')
                         Store.Validation.resetForm(true)
-                        Swal.fire('Created successfully!', '', 'success')
+                        // Swal.fire('Created successfully!', '', 'success')
                     })
                 }
             })
