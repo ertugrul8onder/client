@@ -4,6 +4,9 @@ const Store = {
     AddNewForm: $('#addNewForm')[0],
     HobbiesRepeater: $('#hobbiesRepeater'),
     SubmitButton: $('#submitButton'),
+    FirstName: $('#firstName'),
+    LastName: $('#lastName'),
+    Email: $('#email'),
     FormMethod: ''
 }
 
@@ -199,20 +202,18 @@ const UsersTable = function () {
                 if (status === 'Valid') {
                     let hobbies = getHobbies()
                     let formData = {
-                        first_name: $('#firstName').val(),
-                        last_name: $('#lastName').val(),
-                        email: $('#email').val(),
+                        first_name: Store.FirstName.val(),
+                        last_name: Store.LastName.val(),
+                        email: Store.Email.val(),
                         hobbies: hobbies
                     }
 
                     postUser(formData).done(function (data) {
                         Store.Table.row.add(JSON.parse(data)).draw()
-                        Store.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
-                            $(this).remove()
-                            Store.AddNewModal.modal('hide')
-                            Store.Validation.resetForm(true)
-                            Swal.fire('Created successfully!', '', 'success')
-                        })
+                        Store.HobbiesRepeater.find('[data-repeater-item]').slideUp()
+                        Store.AddNewModal.modal('hide')
+                        Store.Validation.resetForm(true)
+                        Swal.fire('Created successfully!', '', 'success')
                     })
                 }
             })
@@ -255,10 +256,20 @@ const UsersTable = function () {
             Store.AddNewModal.modal('show')
             let row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
             let rowData = Store.Table.row(row).data()
+            const setHobbies = function () {
+                let hobbies = []
 
-            $('#firstName').val(rowData.first_name)
-            $('#lastName').val(rowData.last_name)
-            $('#email').val(rowData.email)
+                rowData.hobbies && rowData.hobbies.forEach(function (item, i) {
+                    hobbies.push({ hobbie: item })
+                })
+
+                return hobbies
+            }
+
+            Store.FirstName.val(rowData.first_name)
+            Store.LastName.val(rowData.last_name)
+            Store.Email.val(rowData.email)
+            Store.HobbiesRepeater.setList(setHobbies())
         })
 
         Store.AddNewModal.on('show.bs.modal', function () {
@@ -274,7 +285,7 @@ const UsersTable = function () {
 
     const initFormRepeater = function () {
         Store.HobbiesRepeater.repeater({
-            initEmpty: true,
+            initEmpty: false,
             show: function () {
                 $(this).slideDown()
             },
