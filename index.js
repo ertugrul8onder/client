@@ -1,13 +1,18 @@
 const Store = {
-    AddNewModal: $('#addNewModal'),
-    AddNewButton: $('#addNewButton'),
-    AddNewForm: $('#addNewForm')[0],
-    HobbiesRepeater: $('#hobbiesRepeater'),
-    SubmitButton: $('#submitButton'),
-    FirstName: $('#firstName'),
-    LastName: $('#lastName'),
-    Email: $('#email'),
-    FormMethod: ''
+    Elements: {
+        AddNewButton: $('#addNewButton'),
+        AddNewModal: $('#addNewModal'),
+        AddNewForm: $('#addNewForm'),
+        FirstName: $('#firstName'),
+        LastName: $('#lastName'),
+        Email: $('#email'),
+        HobbiesRepeater: $('#hobbiesRepeater'),
+        SubmitButton: $('#submitButton'),
+    },
+    UpdateRow: {},
+    DeleteRow: {},
+    Hobbies: [],
+    FormAction: '',
 }
 
 const UsersTable = function () {
@@ -128,7 +133,7 @@ const UsersTable = function () {
 
     const initFormValidation = function () {
         let validation = FormValidation.formValidation(
-            Store.AddNewForm,
+            Store.Elements.AddNewForm[0],
             {
                 fields: {
                     firstName: {
@@ -185,42 +190,74 @@ const UsersTable = function () {
     }
 
     const initClickListeners = function () {
-        Store.SubmitButton.on('click', function () {
-            const getHobbies = function () {
-                let hobbies = []
+        const getHobbies = function () {
+            let hobbies = []
+            Store.Elements.HobbiesRepeater.find('input').each(function (i, item) {
+                if ($(item).val() !== '') {
+                    hobbies.push($(item).val())
+                }
+            })
 
-                Store.HobbiesRepeater.find('input').each(function (i, item) {
-                    if ($(item).val() !== '') {
-                        hobbies.push($(item).val())
-                    }
-                })
+            return hobbies
+        }
 
-                return hobbies
-            }
+        Store.Elements.AddNewButton.on('click', function () {
+            Store.FormAction = 'POST'
+            Store.Elements.AddNewModal.modal('show')
+            Store.Elements.AddNewModal.find('#addNewModalLabel').html('Add New Modal')
+        })
 
+        Store.Elements.SubmitButton.on('click', function () {
             Store.Validation.validate().then(async function (status) {
                 if (status === 'Valid') {
                     let hobbies = getHobbies()
                     let formData = {
-                        first_name: Store.FirstName.val(),
-                        last_name: Store.LastName.val(),
-                        email: Store.Email.val(),
-                        hobbies: hobbies
+                        first_name: Store.Elements.FirstName.val(),
+                        last_name: Store.Elements.LastName.val(),
+                        email: Store.Elements.Email.val(),
                     }
 
-                    postUser(formData).done(function (data) {
-                        Store.Table.row.add(JSON.parse(data)).draw()
-                        Store.HobbiesRepeater.find('[data-repeater-item]').slideUp()
-                        Store.AddNewModal.modal('hide')
+                    if (hobbies.length) {
+                        formData.hobbies = hobbies
+                    }
+
+                    const afterFunc = function () {
                         Store.Validation.resetForm(true)
-                        Swal.fire('Created successfully!', '', 'success')
-                    })
+                        Store.Elements.AddNewModal.modal('hide')
+                    }
+
+                    if (Store.FormAction === 'POST') {
+                        postUser(formData).done(function (data) {
+                            Store.Table.row.add(JSON.parse(data)).draw()
+                            if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
+                                Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
+                                    $(this).remove()
+                                    afterFunc()
+                                    Swal.fire('Created successfully!', '', 'success')
+                                })
+                            } else {
+                                afterFunc()
+                                Swal.fire('Created successfully!', '', 'success')
+                            }
+                        })
+                    } else if (Store.FormAction === 'UPDATE') {
+                        formData.id = Store.UpdateRow.Data.id
+                        updateUser(formData).done(function (data) {
+                            Store.Table.row(Store.UpdateRow.Row).data(JSON.parse(data)).draw()
+                            if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
+                                Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
+                                    $(this).remove()
+                                    afterFunc()
+                                    Swal.fire('Updated successfully!', '', 'success')
+                                })
+                            } else {
+                                afterFunc()
+                                Swal.fire('Updated successfully!', '', 'success')
+                            }
+                        })
+                    }
                 }
             })
-        })
-
-        Store.AddNewButton.on('click', function () {
-            Store.FormMethod = 'POST'
         })
 
         Store.Table.on('click', 'a.deleteButton', function () {
@@ -236,47 +273,54 @@ const UsersTable = function () {
                 },
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
-                    let rowData = Store.Table.row(row).data()
+                    Store.DeleteRow.Row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
+                    Store.DeleteRow.Data = Store.Table.row(Store.DeleteRow.Row).data()
 
                     let deleteData = {
-                        id: rowData.id
+                        id: Store.DeleteRow.Data.id
                     }
 
-                    deleteUser(row, deleteData).done(function (data) {
-                        Store.Table.row(row).remove().draw()
+                    deleteUser(deleteData).done(function (data) {
+                        Store.Table.row(Store.DeleteRow.Row).remove().draw()
                         Swal.fire('Deleted successfully!', '', 'success')
+                        Store.DeleteRow = {}
                     })
                 }
             })
         })
 
         Store.Table.on('click', 'a.editButton', function () {
-            Store.FormMethod = 'UPDATE'
-            Store.AddNewModal.modal('show')
-            let row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
-            let rowData = Store.Table.row(row).data()
-            const setHobbies = function () {
-                let hobbies = []
+            Store.FormAction = 'UPDATE'
+            Store.Elements.AddNewModal.modal('show')
+            Store.Elements.AddNewModal.find('#addNewModalLabel').html('Edit Modal')
 
-                rowData.hobbies && rowData.hobbies.forEach(function (item, i) {
-                    hobbies.push({ hobbie: item })
-                })
+            Store.UpdateRow.Row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
+            Store.UpdateRow.Data = Store.Table.row(Store.UpdateRow.Row).data()
 
-                return hobbies
-            }
+            Store.Validation.resetForm(true)
 
-            Store.FirstName.val(rowData.first_name)
-            Store.LastName.val(rowData.last_name)
-            Store.Email.val(rowData.email)
-            Store.HobbiesRepeater.setList(setHobbies())
+            Store.Elements.FirstName.val(Store.UpdateRow.Data.first_name)
+            Store.Elements.LastName.val(Store.UpdateRow.Data.last_name)
+            Store.Elements.Email.val(Store.UpdateRow.Data.email)
         })
 
-        Store.AddNewModal.on('show.bs.modal', function () {
-            if (Store.FormMethod === 'POST') {
-                Store.AddNewModal.find('#addNewModalLabel').html('Add New Modal')
-            } else if (Store.FormMethod === 'UPDATE') {
-                Store.AddNewModal.find('#addNewModalLabel').html('Edit Modal')
+        Store.Elements.AddNewModal.on('shown.bs.modal', function () {
+            if (Store.FormAction === 'UPDATE') {
+                if (Store.UpdateRow.Data.hobbies) {
+                    let hobbies = []
+                    Store.UpdateRow.Data.hobbies.forEach(item => { hobbies.push({ hobbie: item }) })
+                    Store.Elements.HobbiesRepeater.setList(hobbies)
+                }
+            }
+        })
+
+        Store.Elements.AddNewModal.on('hidden.bs.modal', function () {
+            if (Store.FormAction === 'UPDATE') {
+                Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
+                    $(this).remove()
+                })
+                Store.Validation.resetForm(true)
+                Store.UpdateRow.Data = {}
             }
         })
 
@@ -284,8 +328,8 @@ const UsersTable = function () {
     }
 
     const initFormRepeater = function () {
-        Store.HobbiesRepeater.repeater({
-            initEmpty: false,
+        Store.Elements.HobbiesRepeater.repeater({
+            initEmpty: true,
             show: function () {
                 $(this).slideDown()
             },
@@ -323,12 +367,12 @@ const UsersTable = function () {
             error: function (error) {
                 console.log(error)
                 Swal.fire('Bir hata oluştu', 'error')
-                Store.AddNewModal.modal('hide')
+                Store.Elements.AddNewModal.modal('hide')
             }
         })
     }
 
-    const deleteUser = function (row, deleteData) {
+    const deleteUser = function (deleteData) {
         return $.ajax({
             url: 'https://api.ertugrulonder.com/data',
             type: 'DELETE',
@@ -340,6 +384,24 @@ const UsersTable = function () {
             },
             error: function (error) {
                 console.log(error)
+            }
+        })
+    }
+
+    const updateUser = function (updateData) {
+        return $.ajax({
+            url: 'https://api.ertugrulonder.com/data',
+            type: 'PUT',
+            data: JSON.stringify(updateData),
+            dataType: "text",
+            contentType: "application/json",
+            success: function (data) {
+                // console.log(data)
+            },
+            error: function (error) {
+                console.log(error)
+                Swal.fire('Bir hata oluştu', 'error')
+                Store.Elements.AddNewModal.modal('hide')
             }
         })
     }
