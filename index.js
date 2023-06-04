@@ -1,5 +1,7 @@
 const Store = {
     Elements: {
+        TableCard: $('#tableCard'),
+        ExportButton: $('#exportButton'),
         AddNewButton: $('#addNewButton'),
         AddNewModal: $('#addNewModal'),
         AddNewForm: $('#addNewForm'),
@@ -305,11 +307,23 @@ const UsersTable = function () {
         })
 
         Store.Elements.AddNewModal.on('shown.bs.modal', function () {
-            if (Store.FormAction === 'UPDATE') {
+            const afterFunc = function () {
+                let hobbies = []
+                Store.UpdateRow.Data.hobbies.forEach(item => { hobbies.push({ hobbie: item }) })
+                Store.Elements.HobbiesRepeater.setList(hobbies)
+            }
+
+            if (Store.FormAction === 'POST') {
+            } else if (Store.FormAction === 'UPDATE') {
                 if (Store.UpdateRow.Data.hobbies) {
-                    let hobbies = []
-                    Store.UpdateRow.Data.hobbies.forEach(item => { hobbies.push({ hobbie: item }) })
-                    Store.Elements.HobbiesRepeater.setList(hobbies)
+                    if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
+                        Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
+                            $(this).remove()
+                            afterFunc()
+                        })
+                    } else {
+                        afterFunc()
+                    }
                 }
             }
         })
@@ -408,7 +422,7 @@ const UsersTable = function () {
 
     return {
         init: function () {
-            getUsers().done(function (data, textStatus, jqXHR) {
+            getUsers().done(function (data) {
                 let tableData = Object.values(data)
                 let tableKeys = Object.keys(data)
 
@@ -416,13 +430,17 @@ const UsersTable = function () {
                     item.id = tableKeys[i]
                 });
 
+                Store.Elements.TableCard.removeClass('gradient')
+                Store.Elements.ExportButton.removeClass('disabled')
+                Store.Elements.AddNewButton.removeClass('disabled')
+
                 Store.Table = initTable(tableData)
                 Store.Validation = initFormValidation()
 
                 initFormRepeater()
                 initClickListeners()
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                console.log(jqXHR)
+            }).fail(function (error) {
+                console.log(error)
             })
         },
     };

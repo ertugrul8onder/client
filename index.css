@@ -1,0 +1,12 @@
+.gradient {
+    background:
+        linear-gradient(90deg, #dfdfdf 33%, white, #dfdfdf 66%) gray;
+    background-size: 300% 100%;
+    animation: shine 2s infinite;
+}
+
+@keyframes shine {
+    0% {
+        background-position: right;
+    }
+}
