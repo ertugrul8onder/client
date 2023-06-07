@@ -126,29 +126,31 @@
 														<div class="col-md-2">
 															<label class="h5">Hobbies:</label>
 														</div>
-														<div class="col-md-10" data-repeater-list>
+														<div class="col-md-10" data-repeater-list="hobbies">
 															<div data-repeater-item
 																class="form-group row align-items-end">
-																<div class="col-md-8">
+
+																<div class="input-group">
 																	<input name="hobbie" type="text"
 																		class="form-control"
 																		placeholder="Enter hobbie" />
-																	<div class="d-md-none mb-2"></div>
-																</div>
-																<div class="col-md-4">
-																	<a href="javascript:;" data-repeater-delete
-																		class="btn btn-sm font-weight-bolder btn-light-danger m-1">
-																		<i class="la la-trash-o"></i>Delete</a>
+																	<div class="input-group-append">
+																		<a href="javascript:;" data-repeater-delete
+																			class="btn font-weight-bold btn-light-danger">
+																			<i class="la la-trash-o"></i>Delete
+																		</a>
+																	</div>
 																</div>
 															</div>
 														</div>
 													</div>
 													<div class="form-group row">
 														<div class="col-md-2"></div>
-														<div class="col-md-10">
+														<div class="col-md-10 pl-0">
 															<a href="javascript:;" data-repeater-create
-																class="btn btn-sm font-weight-bolder btn-light-primary">
-																<i class="la la-plus"></i>Add</a>
+																class="btn btn-sm font-weight-bold btn-light-primary">
+																<i class="la la-plus"></i>Add
+															</a>
 														</div>
 													</div>
 												</div>

@@ -45,7 +45,7 @@ const UsersTable = function () {
                 {
                     title: 'Last Name',
                     data: 'last_name',
-                    width: '20%'
+                    width: '20%',
                 },
                 {
                     title: 'Email',
@@ -78,7 +78,7 @@ const UsersTable = function () {
 
                         if (data) {
                             data.forEach(function (item, i) {
-                                html += `<span class="label label-lg label-${getColors()} label-inline m-1">${item}</span>`
+                                html += `<span class="label label-lg label-${getColors()} label-inline p-2 m-1" style="height: auto">${item}</span>`
                             })
                         }
 
@@ -143,12 +143,10 @@ const UsersTable = function () {
                             notEmpty: {
                                 message: 'First name is required'
                             },
-                            // different: {
-                            //     compare: function () {
-                            //         return ''
-                            //     },
-                            //     message: 'First name cannot be the same'
-                            // }
+                            stringLength: {
+                                max: 35,
+                                message: 'Please enter a value less than 30 characters'
+                            }
                         }
                     },
                     lastName: {
@@ -156,12 +154,10 @@ const UsersTable = function () {
                             notEmpty: {
                                 message: 'Last name is required'
                             },
-                            // different: {
-                            //     compare: function () {
-                            //         return ''
-                            //     },
-                            //     message: 'Last name cannot be the same'
-                            // }
+                            stringLength: {
+                                max: 35,
+                                message: 'Please enter a value less than 30 characters'
+                            }
                         }
                     },
                     email: {
@@ -169,15 +165,13 @@ const UsersTable = function () {
                             notEmpty: {
                                 message: 'Email is required'
                             },
+                            stringLength: {
+                                max: 255,
+                                message: 'Please enter a value less than 256 characters'
+                            },
                             emailAddress: {
                                 message: 'The value is not a valid email address'
                             }
-                            // different: {
-                            //     compare: function () {
-                            //         return ''
-                            //     },
-                            //     message: 'Email cannot be the same'
-                            // }
                         }
                     },
                 },
@@ -194,12 +188,13 @@ const UsersTable = function () {
     const initClickListeners = function () {
         const getHobbies = function () {
             let hobbies = []
-            Store.Elements.HobbiesRepeater.find('input').each(function (i, item) {
-                if ($(item).val() !== '') {
-                    hobbies.push($(item).val())
-                }
-            })
-
+            if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
+                Store.Elements.HobbiesRepeater.repeaterVal().hobbies.forEach(function (item, i) {
+                    if (item.hobbie !== '') {
+                        hobbies.push(item.hobbie)
+                    }
+                })
+            }
             return hobbies
         }
 
@@ -210,6 +205,18 @@ const UsersTable = function () {
         })
 
         Store.Elements.SubmitButton.on('click', function () {
+            if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
+                Store.Elements.HobbiesRepeater.find('[data-repeater-item] input').each(function (i, item) {
+                    Store.Validation.addField($(item).attr('name'), {
+                        validators: {
+                            stringLength: {
+                                max: 30,
+                                message: 'Please enter a value less than 30 characters'
+                            }
+                        }
+                    })
+                })
+            }
             Store.Validation.validate().then(async function (status) {
                 if (status === 'Valid') {
                     let hobbies = getHobbies()
@@ -235,6 +242,11 @@ const UsersTable = function () {
                                 Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
                                     $(this).remove()
                                     afterFunc()
+                                    Object.keys(Store.Validation.getFields()).forEach(function (item) {
+                                        if (item.includes('hobbie')) {
+                                            Store.Validation.removeField(item)
+                                        }
+                                    })
                                     Swal.fire('Created successfully!', '', 'success')
                                 })
                             } else {
@@ -250,6 +262,11 @@ const UsersTable = function () {
                                 Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
                                     $(this).remove()
                                     afterFunc()
+                                    Object.keys(Store.Validation.getFields()).forEach(function (item) {
+                                        if (item.includes('hobbie')) {
+                                            Store.Validation.removeField(item)
+                                        }
+                                    })
                                     Swal.fire('Updated successfully!', '', 'success')
                                 })
                             } else {
@@ -337,8 +354,6 @@ const UsersTable = function () {
                 Store.UpdateRow.Data = {}
             }
         })
-
-
     }
 
     const initFormRepeater = function () {
@@ -380,7 +395,7 @@ const UsersTable = function () {
             },
             error: function (error) {
                 console.log(error)
-                Swal.fire('Bir hata oluştu', 'error')
+                Swal.fire('An error occurred', 'error')
                 Store.Elements.AddNewModal.modal('hide')
             }
         })
@@ -414,7 +429,7 @@ const UsersTable = function () {
             },
             error: function (error) {
                 console.log(error)
-                Swal.fire('Bir hata oluştu', 'error')
+                Swal.fire('An error occurred', 'error')
                 Store.Elements.AddNewModal.modal('hide')
             }
         })
