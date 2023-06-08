@@ -11,9 +11,23 @@ const Store = {
         HobbiesRepeater: $('#hobbiesRepeater'),
         SubmitButton: $('#submitButton'),
     },
+    Functions: {
+        removeValidators: function () {
+            Object.keys(Store.Validation.getFields()).forEach(function (item) {
+                if (item.includes('hobbie')) {
+                    Store.Validation.removeField(item)
+                }
+            })
+        },
+        afterPost: function () {
+            Store.Validation.resetForm(true)
+            Store.Elements.AddNewModal.modal('hide')
+        }
+    },
     UpdateRow: {},
     DeleteRow: {},
     Hobbies: [],
+    HobbiesFields: [],
     FormAction: '',
 }
 
@@ -179,6 +193,16 @@ const UsersTable = function () {
                     trigger: new FormValidation.plugins.Trigger(),
                     bootstrap: new FormValidation.plugins.Bootstrap(),
                     submitButton: new FormValidation.plugins.SubmitButton(),
+                    // message: new FormValidation.plugins.Message({
+                    //     clazz: 'bg-red',
+                    //     container: function (field, ele) {
+                    //         // Look at the markup
+                    //         // <div class="fl w-25 pa2">Label</div>
+                    //         // <div class="fl w-30">Form field</div>
+                    //         // <div class="fl w-40 messageContainer"></div>
+                    //         return FormValidation.utils.closest(ele, '.fl').nextElementSibling;
+                    //     },
+                    // }),
                 },
             })
 
@@ -205,18 +229,6 @@ const UsersTable = function () {
         })
 
         Store.Elements.SubmitButton.on('click', function () {
-            if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
-                Store.Elements.HobbiesRepeater.find('[data-repeater-item] input').each(function (i, item) {
-                    Store.Validation.addField($(item).attr('name'), {
-                        validators: {
-                            stringLength: {
-                                max: 30,
-                                message: 'Please enter a value less than 30 characters'
-                            }
-                        }
-                    })
-                })
-            }
             Store.Validation.validate().then(async function (status) {
                 if (status === 'Valid') {
                     let hobbies = getHobbies()
@@ -230,27 +242,18 @@ const UsersTable = function () {
                         formData.hobbies = hobbies
                     }
 
-                    const afterFunc = function () {
-                        Store.Validation.resetForm(true)
-                        Store.Elements.AddNewModal.modal('hide')
-                    }
-
                     if (Store.FormAction === 'POST') {
                         postUser(formData).done(function (data) {
                             Store.Table.row.add(JSON.parse(data)).draw()
                             if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
                                 Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
                                     $(this).remove()
-                                    afterFunc()
-                                    Object.keys(Store.Validation.getFields()).forEach(function (item) {
-                                        if (item.includes('hobbie')) {
-                                            Store.Validation.removeField(item)
-                                        }
-                                    })
+                                    Store.Functions.afterPost()
+                                    Store.Functions.removeValidators()
                                     Swal.fire('Created successfully!', '', 'success')
                                 })
                             } else {
-                                afterFunc()
+                                Store.Functions.afterPost()
                                 Swal.fire('Created successfully!', '', 'success')
                             }
                         })
@@ -261,16 +264,12 @@ const UsersTable = function () {
                             if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
                                 Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
                                     $(this).remove()
-                                    afterFunc()
-                                    Object.keys(Store.Validation.getFields()).forEach(function (item) {
-                                        if (item.includes('hobbie')) {
-                                            Store.Validation.removeField(item)
-                                        }
-                                    })
+                                    Store.Functions.afterPost()
+                                    Store.Functions.removeValidators()
                                     Swal.fire('Updated successfully!', '', 'success')
                                 })
                             } else {
-                                afterFunc()
+                                Store.Functions.afterPost()
                                 Swal.fire('Updated successfully!', '', 'success')
                             }
                         })
@@ -357,13 +356,32 @@ const UsersTable = function () {
     }
 
     const initFormRepeater = function () {
+        let order = 0
         Store.Elements.HobbiesRepeater.repeater({
             initEmpty: true,
             show: function () {
+                order++
+                let hobbieValidator = {
+                    selector: `[order='${order}']`,
+                    validators: {
+                        notEmpty: {
+                            message: 'Hobbie name is required'
+                        },
+                        stringLength: {
+                            max: 25,
+                            message: 'Please enter a value less than 25 characters'
+                        }
+                    },
+                }
                 $(this).slideDown()
+                $(this).find('input').attr('order', order)
+                Store.Validation.addField(`hobbie[${order}]`, hobbieValidator)
+                console.log(Store.Validation.fields)
             },
             hide: function (deleteElement) {
                 $(this).slideUp(deleteElement)
+                Store.Validation.removeField(`hobbie[${$(this).find('input').attr('order')}]`)
+                console.log(Store.Validation.fields)
             },
         })
     }
@@ -456,6 +474,8 @@ const UsersTable = function () {
                 initClickListeners()
             }).fail(function (error) {
                 console.log(error)
+                Swal.fire('Cannot get data', 'error')
+                Store.Elements.TableCard.removeClass('gradient')
             })
         },
     };
