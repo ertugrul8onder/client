@@ -315,6 +315,7 @@ const UsersTable = function () {
             Store.UpdateRow.Row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
             Store.UpdateRow.Data = Store.Table.row(Store.UpdateRow.Row).data()
 
+            Store.Functions.removeValidators()
             Store.Validation.resetForm(true)
 
             Store.Elements.FirstName.val(Store.UpdateRow.Data.first_name)
