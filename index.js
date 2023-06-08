@@ -376,12 +376,12 @@ const UsersTable = function () {
                 $(this).slideDown()
                 $(this).find('input').attr('order', order)
                 Store.Validation.addField(`hobbie[${order}]`, hobbieValidator)
-                console.log(Store.Validation.fields)
+                // console.log(Store.Validation.fields)
             },
             hide: function (deleteElement) {
                 $(this).slideUp(deleteElement)
                 Store.Validation.removeField(`hobbie[${$(this).find('input').attr('order')}]`)
-                console.log(Store.Validation.fields)
+                // console.log(Store.Validation.fields)
             },
         })
     }
