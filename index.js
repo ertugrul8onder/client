@@ -12,16 +12,36 @@ const Store = {
         SubmitButton: $('#submitButton'),
     },
     Functions: {
-        removeValidators: function () {
-            Object.keys(Store.Validation.getFields()).forEach(function (item) {
+        resetform: function () {
+            this.Parent.Validation.resetForm(true)
+            this.Parent.Elements.AddNewModal.modal('hide')
+        },
+        getRepeaterItems: function () {
+            return this.Parent.Elements.HobbiesRepeater.find('[data-repeater-item]')
+        },
+        getHobbies: function () {
+            let hobbies = []
+            if (this.getRepeaterItems().length) {
+                this.Parent.Elements.HobbiesRepeater.repeaterVal().hobbies.forEach(function (item, i) {
+                    if (item.hobbie !== '') {
+                        hobbies.push(item.hobbie)
+                    }
+                })
+            }
+            return hobbies
+        },
+        resetValidators: function () {
+            let _this = this
+            Object.keys(this.Parent.Validation.getFields()).forEach(function (item) {
                 if (item.includes('hobbie')) {
-                    Store.Validation.removeField(item)
+                    _this.Parent.Validation.removeField(item)
                 }
             })
         },
-        afterPost: function () {
-            Store.Validation.resetForm(true)
-            Store.Elements.AddNewModal.modal('hide')
+        setRepeaterItems: function () {
+            let hobbies = []
+            this.Parent.UpdateRow.Data.hobbies.forEach(item => { hobbies.push({ hobbie: item }) })
+            this.Parent.Elements.HobbiesRepeater.setList(hobbies)
         }
     },
     UpdateRow: {},
@@ -29,7 +49,12 @@ const Store = {
     Hobbies: [],
     HobbiesFields: [],
     FormAction: '',
-}
+    Init: function () {
+        this.Functions.Parent = this
+        delete this.Init
+        return this
+    }
+}.Init()
 
 const UsersTable = function () {
     const getColors = function () {
@@ -153,6 +178,7 @@ const UsersTable = function () {
             {
                 fields: {
                     firstName: {
+                        selector: '[name="firstName"]',
                         validators: {
                             notEmpty: {
                                 message: 'First name is required'
@@ -160,10 +186,17 @@ const UsersTable = function () {
                             stringLength: {
                                 max: 35,
                                 message: 'Please enter a value less than 30 characters'
+                            },
+                            different: {
+                                compare: function () {
+                                    return ''
+                                },
+                                message: 'First name cannot be same'
                             }
                         }
                     },
                     lastName: {
+                        selector: '[name="lastName"]',
                         validators: {
                             notEmpty: {
                                 message: 'Last name is required'
@@ -171,10 +204,17 @@ const UsersTable = function () {
                             stringLength: {
                                 max: 35,
                                 message: 'Please enter a value less than 30 characters'
+                            },
+                            different: {
+                                compare: function () {
+                                    return ''
+                                },
+                                message: 'Last name cannot be same'
                             }
                         }
                     },
                     email: {
+                        selector: '[name="email"]',
                         validators: {
                             notEmpty: {
                                 message: 'Email is required'
@@ -185,6 +225,12 @@ const UsersTable = function () {
                             },
                             emailAddress: {
                                 message: 'The value is not a valid email address'
+                            },
+                            different: {
+                                compare: function () {
+                                    return ''
+                                },
+                                message: 'Email name cannot be same'
                             }
                         }
                     },
@@ -193,16 +239,6 @@ const UsersTable = function () {
                     trigger: new FormValidation.plugins.Trigger(),
                     bootstrap: new FormValidation.plugins.Bootstrap(),
                     submitButton: new FormValidation.plugins.SubmitButton(),
-                    // message: new FormValidation.plugins.Message({
-                    //     clazz: 'bg-red',
-                    //     container: function (field, ele) {
-                    //         // Look at the markup
-                    //         // <div class="fl w-25 pa2">Label</div>
-                    //         // <div class="fl w-30">Form field</div>
-                    //         // <div class="fl w-40 messageContainer"></div>
-                    //         return FormValidation.utils.closest(ele, '.fl').nextElementSibling;
-                    //     },
-                    // }),
                 },
             })
 
@@ -210,18 +246,6 @@ const UsersTable = function () {
     }
 
     const initClickListeners = function () {
-        const getHobbies = function () {
-            let hobbies = []
-            if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
-                Store.Elements.HobbiesRepeater.repeaterVal().hobbies.forEach(function (item, i) {
-                    if (item.hobbie !== '') {
-                        hobbies.push(item.hobbie)
-                    }
-                })
-            }
-            return hobbies
-        }
-
         Store.Elements.AddNewButton.on('click', function () {
             Store.FormAction = 'POST'
             Store.Elements.AddNewModal.modal('show')
@@ -231,7 +255,7 @@ const UsersTable = function () {
         Store.Elements.SubmitButton.on('click', function () {
             Store.Validation.validate().then(async function (status) {
                 if (status === 'Valid') {
-                    let hobbies = getHobbies()
+                    let hobbies = Store.Functions.getHobbies()
                     let formData = {
                         first_name: Store.Elements.FirstName.val(),
                         last_name: Store.Elements.LastName.val(),
@@ -245,15 +269,14 @@ const UsersTable = function () {
                     if (Store.FormAction === 'POST') {
                         postUser(formData).done(function (data) {
                             Store.Table.row.add(JSON.parse(data)).draw()
-                            if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
-                                Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
-                                    $(this).remove()
-                                    Store.Functions.afterPost()
-                                    Store.Functions.removeValidators()
+                            if (Store.Functions.getRepeaterItems().length) {
+                                Store.Functions.getRepeaterItems().slideUp(function () {
+                                    Store.Functions.resetform()
+                                    Store.Functions.resetValidators()
                                     Swal.fire('Created successfully!', '', 'success')
                                 })
                             } else {
-                                Store.Functions.afterPost()
+                                Store.Functions.resetform()
                                 Swal.fire('Created successfully!', '', 'success')
                             }
                         })
@@ -261,15 +284,16 @@ const UsersTable = function () {
                         formData.id = Store.UpdateRow.Data.id
                         updateUser(formData).done(function (data) {
                             Store.Table.row(Store.UpdateRow.Row).data(JSON.parse(data)).draw()
-                            if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
-                                Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
-                                    $(this).remove()
-                                    Store.Functions.afterPost()
-                                    Store.Functions.removeValidators()
+                            if (Store.Functions.getRepeaterItems().length) {
+                                Store.Functions.getRepeaterItems().slideUp(function () {
+                                    Store.Functions.resetform()
+                                    Store.Functions.resetValidators()
+                                    Store.UpdateRow = {}
                                     Swal.fire('Updated successfully!', '', 'success')
                                 })
                             } else {
-                                Store.Functions.afterPost()
+                                Store.Functions.resetform()
+                                Store.UpdateRow = {}
                                 Swal.fire('Updated successfully!', '', 'success')
                             }
                         })
@@ -279,6 +303,9 @@ const UsersTable = function () {
         })
 
         Store.Table.on('click', 'a.deleteButton', function () {
+            Store.DeleteRow.Row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
+            Store.DeleteRow.Data = Store.Table.row(Store.DeleteRow.Row).data()
+
             Swal.fire({
                 title: 'Do you want to delete object?',
                 reverseButtons: true,
@@ -291,18 +318,17 @@ const UsersTable = function () {
                 },
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Store.DeleteRow.Row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
-                    Store.DeleteRow.Data = Store.Table.row(Store.DeleteRow.Row).data()
-
                     let deleteData = {
                         id: Store.DeleteRow.Data.id
                     }
 
                     deleteUser(deleteData).done(function (data) {
                         Store.Table.row(Store.DeleteRow.Row).remove().draw()
-                        Swal.fire('Deleted successfully!', '', 'success')
                         Store.DeleteRow = {}
+                        Swal.fire('Deleted successfully!', '', 'success')
                     })
+                } else {
+                    Store.DeleteRow = {}
                 }
             })
         })
@@ -315,31 +341,65 @@ const UsersTable = function () {
             Store.UpdateRow.Row = $(this).closest('tr').hasClass('child') ? $(this).closest('tr').prev() : $(this).closest('tr')
             Store.UpdateRow.Data = Store.Table.row(Store.UpdateRow.Row).data()
 
-            Store.Functions.removeValidators()
             Store.Validation.resetForm(true)
 
             Store.Elements.FirstName.val(Store.UpdateRow.Data.first_name)
             Store.Elements.LastName.val(Store.UpdateRow.Data.last_name)
             Store.Elements.Email.val(Store.UpdateRow.Data.email)
+
+            // Store.Validation.addField('noSame', {
+            //     selector: '.noSame',
+            //     validators: {
+            //         callback: {
+            //             message: 'You need to make at least one change',
+            //             callback: function (input) {
+            //                 let valid = false;
+
+            //                 if (input.element.value !== Store.UpdateRow.Data.first_name) {
+            //                     console.log("asd")
+            //                     valid = true
+            //                     return
+            //                 } else if (input.element.value !== Store.UpdateRow.Data.last_name) {
+            //                     console.log("asd")
+            //                     valid = true
+            //                     return
+            //                 } else if (input.element.value !== Store.UpdateRow.Data.email) {
+            //                     console.log("asd")
+            //                     valid = true
+            //                     return
+            //                 }
+
+            //                 if (valid) {
+            //                     Store.Validation.updateFieldStatus('noSame', 'Valid', 'callback');
+            //                     return true;
+            //                 }
+
+            //                 return false;
+            //             }
+            //         },
+            //     },
+            // })
+
+            // Store.Validation.updateValidatorOption('firstName', 'different', 'compare', function () {
+            //     return `${Store.UpdateRow.Data.first_name}`
+            // }).updateValidatorOption('lastName', 'different', 'compare', function () {
+            //     return `${Store.UpdateRow.Data.last_name}`
+            // }).updateValidatorOption('email', 'different', 'compare', function () {
+            //     return `${Store.UpdateRow.Data.email}`
+            // })
         })
 
         Store.Elements.AddNewModal.on('shown.bs.modal', function () {
-            const afterFunc = function () {
-                let hobbies = []
-                Store.UpdateRow.Data.hobbies.forEach(item => { hobbies.push({ hobbie: item }) })
-                Store.Elements.HobbiesRepeater.setList(hobbies)
-            }
-
-            if (Store.FormAction === 'POST') {
-            } else if (Store.FormAction === 'UPDATE') {
+            if (Store.FormAction === 'UPDATE') {
                 if (Store.UpdateRow.Data.hobbies) {
-                    if (Store.Elements.HobbiesRepeater.find('[data-repeater-item]').length) {
-                        Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
+                    if (Store.Functions.getRepeaterItems().length) {
+                        Store.Functions.getRepeaterItems().slideUp(function () {
                             $(this).remove()
-                            afterFunc()
+                            Store.Functions.resetValidators()
+                            Store.Functions.setRepeaterItems()
                         })
                     } else {
-                        afterFunc()
+                        Store.Functions.setRepeaterItems()
                     }
                 }
             }
@@ -347,11 +407,22 @@ const UsersTable = function () {
 
         Store.Elements.AddNewModal.on('hidden.bs.modal', function () {
             if (Store.FormAction === 'UPDATE') {
-                Store.Elements.HobbiesRepeater.find('[data-repeater-item]').slideUp(function () {
-                    $(this).remove()
-                })
+                if (Store.Functions.getRepeaterItems().length) {
+                    Store.Functions.getRepeaterItems().slideUp(function () {
+                        $(this).remove()
+                        Store.Functions.resetValidators()
+                    })
+                }
+
                 Store.Validation.resetForm(true)
-                Store.UpdateRow.Data = {}
+                // Store.Validation.updateValidatorOption('firstName', 'different', 'compare', function () {
+                //     return ''
+                // }).updateValidatorOption('lastName', 'different', 'compare', function () {
+                //     return ''
+                // }).updateValidatorOption('email', 'different', 'compare', function () {
+                //     return ''
+                // })
+                Store.UpdateRow = {}
             }
         })
     }
@@ -394,7 +465,6 @@ const UsersTable = function () {
             dataType: "json",
             contentType: "application/json",
             success: function (data) {
-                // console.log(data)
             },
             error: function (error) {
                 console.log(error)
@@ -410,7 +480,6 @@ const UsersTable = function () {
             dataType: "text",
             contentType: "application/json",
             success: function (data) {
-                // console.log(data)
             },
             error: function (error) {
                 console.log(error)
@@ -428,7 +497,6 @@ const UsersTable = function () {
             dataType: "text",
             contentType: "application/json",
             success: function (data) {
-                // console.log(data)
             },
             error: function (error) {
                 console.log(error)
@@ -444,7 +512,6 @@ const UsersTable = function () {
             dataType: "text",
             contentType: "application/json",
             success: function (data) {
-                // console.log(data)
             },
             error: function (error) {
                 console.log(error)
@@ -456,28 +523,30 @@ const UsersTable = function () {
 
     return {
         init: function () {
-            getUsers().done(function (data) {
-                let tableData = Object.values(data)
-                let tableKeys = Object.keys(data)
+            getUsers()
+                .done(function (data) {
+                    let tableData = Object.values(data)
+                    let tableKeys = Object.keys(data)
 
-                tableData.forEach((item, i) => {
-                    item.id = tableKeys[i]
-                });
+                    tableData.forEach((item, i) => {
+                        item.id = tableKeys[i]
+                    });
 
-                Store.Elements.TableCard.removeClass('gradient')
-                Store.Elements.ExportButton.removeClass('disabled')
-                Store.Elements.AddNewButton.removeClass('disabled')
+                    Store.Elements.TableCard.removeClass('gradient')
+                    Store.Elements.ExportButton.removeClass('disabled')
+                    Store.Elements.AddNewButton.removeClass('disabled')
 
-                Store.Table = initTable(tableData)
-                Store.Validation = initFormValidation()
+                    Store.Table = initTable(tableData)
+                    Store.Validation = initFormValidation()
 
-                initFormRepeater()
-                initClickListeners()
-            }).fail(function (error) {
-                console.log(error)
-                Swal.fire('Cannot get data', 'error')
-                Store.Elements.TableCard.removeClass('gradient')
-            })
+                    initFormRepeater()
+                    initClickListeners()
+                })
+                .fail(function (error) {
+                    console.log(error)
+                    Swal.fire('Cannot get data', 'error')
+                    Store.Elements.TableCard.removeClass('gradient')
+                })
         },
     };
 }();
