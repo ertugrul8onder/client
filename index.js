@@ -129,10 +129,7 @@ const UsersTable = function () {
                     orderable: false,
                     render: function (data, type, full, meta) {
                         let html =
-                            `<a href="javascript:;" class="btn btn-sm font-weight-bolder btn-light-success btn-icon m-1" title="Print details">                                
-                                <i class="la la-print"></i>
-                            </a>
-                            <a href="javascript:;" class="editButton btn btn-sm font-weight-bolder btn-light-primary btn-icon m-1" title="Edit details">
+                            `<a href="javascript:;" class="editButton btn btn-sm font-weight-bolder btn-light-primary btn-icon m-1" title="Edit details">
                                 <i class="la la-edit"></i>
                             </a>
                             <a href="javascript:;" class="deleteButton btn btn-sm font-weight-bolder btn-light-danger btn-icon m-1" title="Delete">
